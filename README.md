@@ -163,7 +163,7 @@ bash scripts/finetune/inference_hyper_lora.sh
 
 If you find Crab useful for your research and applications, please cite using this BibTeX:
 ```bibtex
-comming...
+coming...
 ```
 
 ## 🔒 License
