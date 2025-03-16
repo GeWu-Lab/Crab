@@ -60,7 +60,7 @@ Basic Dependencies:
 
 Install required packages:
 ```bash
-git clone https://github.com/CserDu/Crab
+git clone git@github.com:GeWu-Lab/Crab.git
 cd Crab
 pip install -r requirements.txt
 ```
