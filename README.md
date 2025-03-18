@@ -76,7 +76,7 @@ LLM Weights:
 
 ## 🚀 Quick Start
 1. Download [finetune weights](https://huggingface.co/ahsgdxhs/Crab/blob/main/finetune_weights.bin) in directory `ckpt_dir`, [AVS_finetune_weights](https://huggingface.co/ahsgdxhs/Crab/blob/main/avs_finetune_weights.bin)  and [AVSS_finetune_weights](https://huggingface.co/ahsgdxhs/Crab/blob/main/avss_finetune_weights.bin) in directory `avs_ckpt_dir`;
-2. Prepare your test samples like this:
+2. Prepare your test samples in `data/example.json` like this:
 ```json
 [
     {
