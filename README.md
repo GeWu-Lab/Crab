@@ -138,8 +138,31 @@ bash scripts/quick_start.sh
 
 
 ## 🗝️ Training
-1. Download [audio pretrain checkpoint](https://huggingface.co/ahsgdxhs/Crab/blob/main/audio_pretrain.bin), [visual pretrain checkpoint](https://huggingface.co/ahsgdxhs/Crab/blob/main/visual_pretrain.bin), [segmentation pretrain checkpoint](https://huggingface.co/ahsgdxhs/Crab/blob/main/segmentation_pretrain.bin) in `prtrain_ckpt_dir`;
-2. Download [AVUIE dataset annotations](https://huggingface.co/datasets/ahsgdxhs/AVUIE) and raw data from [AVE](https://github.com/YapengTian/AVE-ECCV18), [AVVP](https://github.com/YapengTian/AVVP-ECCV20), [AVS](https://github.com/OpenNLPLab/AVSBench), [Ref-AVS](https://github.com/GeWu-Lab/Ref-AVS), [MUSIC-AVQA](https://github.com/GeWu-Lab/MUSIC-AVQA), [VALOR](https://github.com/TXH-mercury/VALOR), modify the `data_root` in `dataset/unified_dataset.py`;
+
+1. Pretrain
+- Use our pre-trained checkpoints:
+  Download [audio pretrain checkpoint](https://huggingface.co/ahsgdxhs/Crab/blob/main/audio_pretrain.bin), [visual pretrain checkpoint](https://huggingface.co/ahsgdxhs/Crab/blob/main/visual_pretrain.bin), [segmentation pretrain checkpoint](https://huggingface.co/ahsgdxhs/Crab/blob/main/segmentation_pretrain.bin) in `prtrain_ckpt_dir`;
+
+- Pretrain based on LLaMA-7b-Chat-hf model:
+  download image and video pretrain dataset from [Video-LLaVA](https://github.com/PKU-YuanGroup/Video-LLaVA/blob/main/TRAIN_AND_VALIDATE.md);
+  download audio pretrain dataset from [AudioCaps](https://github.com/cdjkim/audiocaps);
+  download segmentation pretrain dataset from [LVIS](https://github.com/lvis-dataset/lvis-api);
+
+  For visual pretrain, run:
+  ```bash
+  bash scripts/pretrain/pretrain_visual.sh
+  ```
+  For audio pretrain, run:
+  ```bash
+  bash scripts/pretrain/pretrain_audio.sh
+  ```
+  For segmentation pretrain, run:
+  ```bash
+  bash scripts/pretrain/pretrain_seg.sh
+  ```
+  
+2. Finetune.
+Download [AVUIE dataset annotations](https://huggingface.co/datasets/ahsgdxhs/AVUIE) and raw data from [AVE](https://github.com/YapengTian/AVE-ECCV18), [AVVP](https://github.com/YapengTian/AVVP-ECCV20), [AVS](https://github.com/OpenNLPLab/AVSBench), [Ref-AVS](https://github.com/GeWu-Lab/Ref-AVS), [MUSIC-AVQA](https://github.com/GeWu-Lab/MUSIC-AVQA), [VALOR](https://github.com/TXH-mercury/VALOR), modify the `data_root` in `dataset/unified_dataset.py`;
 3. Jointly training on all tasks:
 ```bash
 bash scripts/finetune/finetun_hyper_lora.sh
