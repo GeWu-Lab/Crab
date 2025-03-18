@@ -1,0 +1,48 @@
+[
+    {
+        "task": "avqa",
+        "audio_path": "/group/40061/cserdu/data/music-avqa/audio_data/00006835.mp3",
+        "video_path": "/group/40061/cserdu/data/music-avqa/video_data/00006835.mp4",
+        "question": "What is the left instrument of the first sounding instrument?"
+    },
+    {
+        "task": "ave",
+        "audio_path": "/group/40061/cserdu/data/ave/AVE_Dataset/audio_data/-67UNKFmRLk.mp3",
+        "video_path": "/group/40061/cserdu/data/ave/AVE_Dataset/AVE/-67UNKFmRLk.mp4"
+    },
+    {
+        "task": "avvp",
+        "audio_path": "/group/40061/cserdu/data/avvp/audio_data/6aV6c8mY0lg.mp3",
+        "video_path": "/group/40061/cserdu/data/avvp/llp_videos/6aV6c8mY0lg.mp4"
+    },
+    {
+        "task": "arig",
+        "audio_path": "/group/40061/cserdu/data/AVS/v1s/HxMoMMrA6Eo_0_5000/audio.wav",
+        "image_path": "/group/40061/cserdu/data/AVS/v1s/HxMoMMrA6Eo_0_5000/frames/1.jpg"
+    },
+    {
+        "task": "s4",
+        "audio_path": "/group/40061/cserdu/data/AVS/v1s/_4R3qHn1n50_0_5000/audio.wav",
+        "image_path": "/group/40061/cserdu/data/AVS/v1s/_4R3qHn1n50_0_5000/frames/0.jpg",
+        "mask_path": "/group/40061/cserdu/data/AVS/v1s/_4R3qHn1n50_0_5000/labels_semantic/0.png"
+    },
+    {
+        "task": "ms3",
+        "audio_path": "/group/40061/cserdu/data/AVS/v1m/3vheOi4y540_1/audio.wav",
+        "image_path": "/group/40061/cserdu/data/AVS/v1m/3vheOi4y540_1/frames/1.jpg",
+        "mask_path": "/group/40061/cserdu/data/AVS/v1m/3vheOi4y540_1/labels_semantic/1.png"
+    },
+    {
+        "task": "ref-avs",
+        "audio_path": "/group/40061/cserdu/data/ref-avs/REFAVS/media/-8mcyL3kWNQ_8000_18000/audio.wav",
+        "image_path": "/group/40061/cserdu/data/ref-avs/REFAVS/media/-8mcyL3kWNQ_8000_18000/frames/7.jpg",
+        "mask_path": "/group/40061/cserdu/data/ref-avs/REFAVS/gt_mask/-8mcyL3kWNQ_8000_18000/fid_11/00007.png",
+        "exp": "making the loudest sound"
+    },
+    {
+        "task":"avss",
+        "audio_path":"/group/40061/cserdu/data/AVS/v2/_aldtLqTVYI_1000_11000/audio.wav",
+        "image_path":"/group/40061/cserdu/data/AVS/v2/_aldtLqTVYI_1000_11000/frames/0.jpg",
+        "mask_path":"/group/40061/cserdu/data/AVS/v2/_aldtLqTVYI_1000_11000/labels_rgb/0.png"
+    }
+]
