@@ -13,7 +13,7 @@ Crab: A Unified Audio-Visual Scene Understanding Model
 <h5 align="center">
 
 
-[![hf_checkpoint](https://img.shields.io/badge/🤗-Crab-9C276A.svg)](https://huggingface.co/ahsgdxhs/Crab) [![hf_data](https://img.shields.io/badge/🤗-AVUIE_dataset-9C276A.svg)](https://huggingface.co/datasets/ahsgdxhs/AVUIE) [![arXiv](https://img.shields.io/badge/Arxiv-2503.13068-AD1C18.svg?logo=arXiv)](https://arxiv.org/pdf/2503.13068) <br>
+[![hf_checkpoint](https://img.shields.io/badge/🤗-Crab_Model-9C276A.svg)](https://huggingface.co/ahsgdxhs/Crab) [![hf_data](https://img.shields.io/badge/🤗-AVUIE_dataset-9C276A.svg)](https://huggingface.co/datasets/ahsgdxhs/AVUIE) [![arXiv](https://img.shields.io/badge/Arxiv-2503.13068-AD1C18.svg?logo=arXiv)](https://arxiv.org/pdf/2503.13068) <br>
 
 <img src="assets/teaser.png" width="800" />
 
