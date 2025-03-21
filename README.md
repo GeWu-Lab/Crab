@@ -186,7 +186,12 @@ bash scripts/finetune/inference_hyper_lora.sh
 
 If you find Crab useful for your research and applications, please cite using this BibTeX:
 ```bibtex
-coming...
+@article{du2025crab,
+  title={Crab: A Unified Audio-Visual Scene Understanding Model with Explicit Cooperation},
+  author={Du, Henghui and Li, Guangyao and Zhou, Chang and Zhang, Chunjie and Zhao, Alan and Hu, Di},
+  journal={arXiv preprint arXiv:2503.13068},
+  year={2025}
+}
 ```
 
 ## 🔒 License
