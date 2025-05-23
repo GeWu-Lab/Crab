@@ -21,8 +21,8 @@ Crab: A Unified Audio-Visual Scene Understanding Model
 
 ## 📰 News
 
-* **[2025.02.27]**  👋👋 Release pretrain and finetune weights.
-* **[2025.02.27]**  👋👋 Release training, evaluation and inference codes of Crab.
+* **[2025.03.18]**  👋👋 Release [pretrain, finetune weights](https://huggingface.co/ahsgdxhs/Crab) and [AV-UIE Dataset](https://huggingface.co/datasets/ahsgdxhs/AVUIE).
+* **[2025.03.15]**  👋👋 Release training, evaluation and inference codes of Crab.
 * **[2025.02.27]**  🔥🔥 Crab has been accepted to CVPR 2025.
 
 
