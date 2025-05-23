@@ -36,6 +36,8 @@ class InferenceArguments:
     ckpt_dir: str = field(default='')
     
     # for infer avs
+    avs_ckpt_dir: str = field(default='')
+    avss_ckpt_dir: str = field(default='')
     adapter_ckpt_path: str = field(default=None)
     test_name: str = field(default='test') # for ref-avs: test_u,test_s,test_n
 
@@ -115,3 +117,7 @@ class TrainingArguments(transformers.TrainingArguments):
     save_modules: str = field(default='vl_projector,al_projector,lora')
 
     exp_desc: str = field(default='exp')
+
+    use_process: bool = field(default=True)
+
+    use_hyper_lora: bool = field(default=True)
