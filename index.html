@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description"
+        content="AnyTouch: Learning Unified Static-Dynamic Representation across Multiple Visuo-tactile Sensors">
+    <meta name="keywords" content="Multi-Sensory, Robotic Manipulation, Multi-Stage">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AnyTouch: Learning Unified Static-Dynamic Representation across Multiple Visuo-tactile Sensors</title>
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']], processEscapes: true } });
+    </script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-PYVRSFMDRL');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+
+    <link rel="stylesheet" href="./static/css/bulma.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+    <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="./static/css/index.css">
+    <!-- <link rel="icon" href="./static/images/logo.png"> -->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer src="./static/js/fontawesome.all.min.js"></script>
+    <script src="./static/js/bulma-carousel.min.js"></script>
+    <script src="./static/js/bulma-slider.min.js"></script>
+    <script src="./static/js/index.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        .card {
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+            /* transition: 0.3s; */
+            /* width: 300px; */
+            border-radius: 10px;
+            /* 圆角的大小 */
+            /* margin: 50px; */
+            padding: 7px;
+            background-color: #f1f1f1;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .card2 {
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+            /* transition: 0.3s; */
+            /* width: 300px; */
+            border-radius: 7px;
+            /* 圆角的大小 */
+            /* margin: 50px; */
+            padding: 5px;
+            background-color: #f1f1f1;
+        }
+
+        .card2:hover {
+            box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link">
+                        More Research
+                    </a>
+                    <div class="navbar-dropdown">
+                        <a class="navbar-item" href="https://gewu-lab.github.io/">
+                            GeWu Lab@RUC
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+
+
+    <section class="hero">
+        <div class="hero-body">
+            <div class="container is-max-desktop">
+                <div class="columns is-centered">
+                    <div class="column has-text-centered">
+                        <h1 class="title is-1 publication-title">AnyTouch: Learning Unified Static-Dynamic
+                            Representation across Multiple Visuo-tactile Sensors</h1>
+                        <h3 class="title is-5 publication-title">International Conference on Learning Representations
+                            (ICLR) 2025</h3>
+                        <div class="is-size-5 publication-authors">
+                            <span class="author-block">
+                                <a href="https://xxuan01.github.io/">Ruoxuan
+                                    Feng</a><sup>1</sup>,</span>
+                            <span class="author-block">
+                                <a href="https://syc-hjy.github.io/">Jiangyu Hu</a><sup>2,3</sup>,</span>
+                            <span class="author-block">
+                                <a href="https://xwinks.github.io/">Wenke Xia</a><sup>1</sup>,</span>
+                            <span class="author-block">
+                                Tianci Gao<sup>1</sup>,</span>
+                            <span class="author-block">
+                                Ao Shen<sup>1</sup>,</span>
+                            <span class="author-block">
+                                <a href="https://scholar.google.com.hk/citations?user=ShKpk00AAAAJ">Yuhao
+                                    Sun</a><sup>3</sup>,</span>
+                            <span class="author-block">
+                                <a href="https://scholar.google.com/citations?user=5G47IcIAAAAJ">Bin
+                                    Fang</a><sup>3</sup>,
+                            </span>
+                            <span class="author-block">
+                                <a href="https://dtaoo.github.io/">Di Hu</a><sup>1</sup>
+                            </span>
+                        </div>
+
+                        <div class="is-size-5 publication-authors">
+                            <span class="author-block"><sup>1</sup>Renmin
+                                University of China &nbsp; &nbsp; <sup>2</sup>Wuhan University of Science and
+                                Technology</span><br />
+                            <span class="author-block"><sup>3</sup>
+                                Beijing University of Posts and Telecommunications</span>
+                        </div>
+
+                        <div class="column has-text-centered">
+                            <div class="publication-links">
+                                <!-- PDF Link. -->
+                                <span class="link-block">
+                                    <a href="https://openreview.net/pdf?id=XToAemis1h"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </span>
+                                        <span>Paper</span>
+                                    </a>
+                                </span>
+                                <!-- <span class="link-block">
+                                    <a href="https://rick-xu315.github.io/ICASSP23_Sup.pdf"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </span>
+                                        <span>Supplementary</span>
+                                    </a>
+                                </span> -->
+                                <span class="link-block">
+                                    <a href="https://arxiv.org/abs/2502.12191" class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                            <i class="ai ai-arxiv"></i>
+                                        </span>
+                                        <span>arXiv</span>
+                                    </a>
+                                </span>
+                                <!-- Code Link. -->
+                                <span class="link-block">
+                                    <a href="https://github.com/GeWu-Lab/AnyTouch"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                            <i class="fab fa-github"></i>
+                                        </span>
+                                        <span>Code</span>
+                                    </a>
+                                </span>
+                                <!-- Dataset Link. -->
+                                <span class="link-block">
+                                    <a href="https://huggingface.co/datasets/xxuan01/TacQuad" class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                            <i class="fa fa-database main-icon"></i>
+                                        </span>
+                                        <span>Dataset</span>
+                                    </a>
+                                </span>
+                                <span class="link-block">
+                                    <a href="https://drive.google.com/file/d/1L4jGUjIHNBMzOiD33Rv0jxWYKHBORD1R/view?usp=sharing"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                            <i class="fa fa-dice-d6"></i>
+                                        </span>
+                                        <span>Checkpoint</span>
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </section>
+
+
+    <section class="hero teaser">
+        <div class="container is-max-desktop">
+            <div class="hero-body">
+                <h2 class="title is-3 has-text-centered">Overview</h2>
+                <!-- <video id="teaser" autoplay muted loop playsinline height="100%">
+              <source src="./static/images/method.pdf">
+            </video> -->
+                <!-- <embed src="./static/images/method.pdf" type="application/pdf"> -->
+                <!-- <embed src="./static/images/all.pdf" type="application/pdf" width="100" height="100"> -->
+                <img src='./static/images/intro.png' width="100%" height="100%">
+                <br><br>
+                <div class="content has-text-justified">
+                    <p>
+                        Tactile perception is crucial for humans to perceive the physical world. Over the years, various
+                        visuo-tactile sensors have been designed to endow robots with human-like tactile perception
+                        abilities. However, the low standardization of visuo-tactile sensors has hindered the
+                        development of a powerful tactile perception system. In this work, we present <b>TacQuad</b>, an
+                        aligned multi-modal multi-sensor tactile dataset that enables the explicit integration of
+                        sensors. Building on this foundation and other open-sourced tactile datasets, we propose
+                        learning unified representations from both static and dynamic perspectives to accommodate a
+                        range of tasks. We introduce <b>AnyTouch</b>, a unified static-dynamic multi-sensor tactile
+                        representation learning framework with a multi-level architecture, enabling comprehensive static
+                        and real-world dynamic tactile perception.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="hero teaser">
+        <div class="container is-max-desktop">
+            <div class="hero-body">
+                <h2 class="title is-3 has-text-centered">TacQuad: Aligned Multi-Modal Multi-Sensor Tactile Dataset</h2>
+                <!-- <video id="teaser" autoplay muted loop playsinline height="100%">
+              <source src="./static/images/method.pdf">
+            </video> -->
+                <!-- <embed src="./static/images/method.pdf" type="application/pdf"> -->
+                <img src='./static/images/dataset.png' width="100%" height="100%">
+                <br><br>
+                <div class="content has-text-justified">
+                    <p> TacQuad is an aligned multi-modal multi-sensor tactile dataset collected from 4 types of
+                        visuo-tactile sensors (GelSight Mini, DIGIT, DuraGel and Tac3D). It offers a more comprehensive
+                        solution to the low standardization of visuo-tactile sensors by providing multi-sensor aligned
+                        data with text and visual images. This explicitly enables models to learn semantic-level tactile
+                        attributes and sensor-agnostic features to form a unified multi-sensor representation space
+                        through data-driven approaches. This dataset includes two subsets of paired data with different
+                        levels of alignment:
+                    </p>
+                    <ul>
+                        <li><b>Fine-grained spatio-temporal aligned data:</b> This portion of the data was collected by
+                            pressing the same location of the same object at the same speed with the four sensors. It
+                            contains a total of 17,524 contact frames from 25 objects, which can be used for
+                            fine-grained tasks such as cross-sensor generation.</li>
+                        <li><b>Coarse-grained spatial aligned data:</b> This portion of the data was collected by hand,
+                            with the four sensors pressing the same location on the same object, although temporal
+                            alignment is not guaranteed. It contains 55,082 contact frames from 99 objects, including
+                            both indoor and outdoor scenes, which can be used for cross-sensor matching task. </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="hero teaser">
+        <div class="container is-max-desktop">
+            <div class="hero-body">
+                <h2 class="title is-3 has-text-centered">AnyTouch Model</h2>
+                <!-- <video id="teaser" autoplay muted loop playsinline height="100%">
+              <source src="./static/images/method.pdf">
+            </video> -->
+                <!-- <embed src="./static/images/method.pdf" type="application/pdf"> -->
+                <img src='./static/images/model.png' width="100%" height="100%">
+                <br><br>
+                <div class="content has-text-justified">
+                    <p> AnyTouch is a unified static-dynamic multi-sensor tactile representation learning framework
+                        which integrates the input format of tactile images and videos. It learns both fine-grained
+                        pixel-level details for refined tasks and semantic-level sensor-agnostic features for
+                        understanding properties and building unified space by a multi-level structure:
+                    </p>
+                    <ul>
+                        <li><b>Masked Image/Video Modeling:</b> To enhance the fine-grained perception capabilities of
+                            the tactile representation model, we employ the masked autoencoder technique compelling the
+                            model to capture pixel-level details across multiple sensors. We randomly mask the tokens of
+                            both tactile images and videos, and build a decoder to obtain the reconstructed static
+                            images and dynamic videos. We also introduce an additional task of predicting the next frame
+                            while reconstructing the dynamic video.</li>
+                        <li><b>Multi-Modal Aligning:</b> We use multi-modal aligning to bind data from
+                            various sensors with paired modalities for a more comprehensive semantic-level perception
+                            and reduce perceptual differences between sensors. We select the text modality, which
+                            consistently describes tactile attributes across datasets, as an anchor to align touch,
+                            vision, and text modalities. The module is also compatible with missing modalities.</li>
+                        <li><b>Cross-Sensor Matching:</b> To fully utilize multi-sensor aligned data and build unified
+                            space by clustering multi-sensor tactile representations of the same object, we introduce a
+                            novel cross-sensor matching task. In this task, the model needs to determine whether two
+                            tactile images or videos are collected from the same position on the same object. We aim to
+                            cluster representations of the same tactile information from different sensors while
+                            performing multi-modal aligning,
+                            thereby enhancing the learning of sensor-agnostic features and forming a unified
+                            multi-sensor representation space.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="hero teaser">
+        <div class="container is-max-desktop">
+            <div class="hero-body">
+                <h2 class="title is-3 has-text-centered">Experiments</h2>
+                <h2 class="title is-4">Sensor Transferability</h2>
+                <img src='./static/images/result1.png'
+                    style="margin-top: 5px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;"
+                    width="90%">
+                <div class="content has-text-justified">
+                    <p>We incorporate data from <span style="color: rgb(61, 127, 207);">GelSight</span>, <span
+                            style="color: rgb(222, 156, 8);">GelSlim</span>, <span
+                            style="color: rgb(0, 180, 26);">DIGIT</span> and <span
+                            style="color: rgb(151, 81, 203);">GelSight Mini</span> into
+                        the training of AnyTouch to obtain four different models, and compare them across four
+                        downstream tasks. We observe performance improvements across the three unseen datasets, with
+                        greater enhancements for unseen sensors than seen sensors. This suggests that the knowledge from
+                        the data of GelSlim, DIGIT, and GelSight Mini can transfer to the GelSight and other sensors.
+                    </p>
+
+                </div>
+                <!-- <p>The results are shown in Table 1:</p> -->
+                <!-- <video id="teaser" autoplay muted loop playsinline height="100%">
+              <source src="./static/images/method.pdf">
+            </video> -->
+                <!-- <embed src="./static/images/method.pdf" type="application/pdf"> -->
+                <!-- <h2 class="subtitle has-text-justified">
+                    $\dagger$ indicates MMCosine is applied. Combined with MMCosine, most of the fusion methods gain
+                    considerable improvement for datasets of various scales, domains, and label amount.
+                </h2> -->
+                <h2 class="title is-4">Multi-Sensor Representation Space</h2>
+                <img src='./static/images/result2.png' style=" margin-bottom: 5px;">
+                <div class="content has-text-justified">
+                    <p>We extract one aligned contact frame from each sensor for the 30 touches in the unused
+                        fine-grained
+                        subset of TacQuad. We then use t-SNE to visualize the tactile representations. With our
+                        cross-sensor
+                        matching task, the representations from different sensors fully mix in a shared multi-sensor
+                        space,
+                        clearly clustering by the object's tactile information. This indicates that our model possesses
+                        the
+                        ability to extract sensor-agnostic features, enabling generalization to unseen sensors.
+
+                    </p>
+                </div>
+
+                <h2 class="title is-4">Static and Dynamic Perception</h2>
+                <div class="container is-max-desktop">
+                    <div class="columns is-centered" style="display: flex; align-items: center; margin-bottom: 0px;">
+                        <div class="column">
+                            <img src='./static/images/result3.png'>
+                        </div>
+
+                        <div class="column">
+                            <img src='./static/images/result4.png'>
+                        </div>
+                    </div>
+                </div>
+                <div class="content has-text-justified">
+                    <p>To validate the benefit of unified multi-sensor representations in transferring knowledge from
+                        multiple sensor data to seen sensors and unseen sensors, we compare AnyTouch with existing
+                        multi-sensor models on two datasets from seen sensors and two datasets from unseen sensors. As
+                        shown in the tables, our AnyTouch model outperforms existing methods on all four datasets,
+                        demonstrating its static perception capabilities on both seen and unseen sensors.
+
+                    </p>
+                </div>
+
+                <img src='./static/images/result5.png'
+                    style="margin-top: 12px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;"
+                    width="85%">
+                <div class="content has-text-justified">
+                    <p>To test the dynamic perception capability of our method in real-world object manipulation tasks,
+                        we conduct experiments on a real-world task: fine-grained pouring. The robot arm must rely
+                        entirely on tactile feedback to pour out 60g of small beads from a cylinder that initially
+                        contains 100g of beads. We conduct 10 real-world test runs and record the mean error. The results
+                        demonstrate the importance of learning unified multi-sensor representations from both static
+                        and dynamic perspectives for completing various tasks including real-world tasks.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <div class="container is-max-desktop content">
+        <h2 class="title">BibTeX</h2>
+        <pre><code>@inproceedings{feng2025learning,
+    title={Learning Unified Static-Dynamic Representation across Multiple Visuo-tactile Sensors},
+    author={Ruoxuan Feng and Jiangyu Hu and Wenke Xia and Tianci Gao and Ao Shen and Yuhao Sun and Bin Fang and Di Hu},
+    booktitle={The Thirteenth International Conference on Learning Representations},
+    year={2025},
+    url={https://openreview.net/forum?id=XToAemis1h}
+}</code></pre>
+    </div>
+
+
+    <footer class="footer">
+        <div class="container">
+            <div class="content has-text-centered">
+                <a class="icon-link" href="https://openreview.net/pdf?id=XToAemis1h">
+                    <i class="fas fa-file-pdf"></i>
+                </a>
+                <a class="icon-link" href="https://github.com/GeWu-Lab/AnyTouch" class="external-link" disabled>
+                    <i class="fab fa-github"></i>
+                </a>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    <div class="content">
+
+                        <p>
+                            Thanks to <a href="https://nerfies.github.io/">Nerfies</a> for providing the
+                            template of this page.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
