@@ -26,7 +26,7 @@ Crab: A Unified Audio-Visual Scene Understanding Model
 * **[2025.02.27]**  🔥🔥 Crab has been accepted to CVPR 2025.
 
 
-<div align="center"><video src="https://huggingface.co/datasets/ahsgdxhs/AVUIE/blob/main/demo.mp4" ></div>
+<div align="center"><video src="https://www.youtube.com/watch?v=O57xewSvOj4" ></div>
 
 
 ## 🌟 Unified Audio-Visual Scene Understanding Capabilities
