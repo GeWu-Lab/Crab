@@ -236,25 +236,11 @@
                 <img src='./static/images/dataset.png' width="100%" height="100%">
                 <br><br>
                 <div class="content has-text-justified">
-                    <p> AV-UIE is an audio-visual unified instruction-tuning dataset with explicit reasoning process.
-                        TacQuad is an aligned multi-modal multi-sensor tactile dataset collected from 4 types of
-                        visuo-tactile sensors (GelSight Mini, DIGIT, DuraGel and Tac3D). It offers a more comprehensive
-                        solution to the low standardization of visuo-tactile sensors by providing multi-sensor aligned
-                        data with text and visual images. This explicitly enables models to learn semantic-level tactile
-                        attributes and sensor-agnostic features to form a unified multi-sensor representation space
-                        through data-driven approaches. This dataset includes two subsets of paired data with different
-                        levels of alignment:
+                    <p> AV-UIE is an audio-visual unified instruction-tuning dataset with explicit reasoning process, which is primarily an 
+                        augmentation of existing audio-visual task datasets. Through above dataset construction process, 
+                        a detailed reasoning process can be obtained, which contains rich information in terms of temporal
+                        and spatial, conductive to temporal and spatial localization tasks.
                     </p>
-                    <ul>
-                        <li><b>Fine-grained spatio-temporal aligned data:</b> This portion of the data was collected by
-                            pressing the same location of the same object at the same speed with the four sensors. It
-                            contains a total of 17,524 contact frames from 25 objects, which can be used for
-                            fine-grained tasks such as cross-sensor generation.</li>
-                        <li><b>Coarse-grained spatial aligned data:</b> This portion of the data was collected by hand,
-                            with the four sensors pressing the same location on the same object, although temporal
-                            alignment is not guaranteed. It contains 55,082 contact frames from 99 objects, including
-                            both indoor and outdoor scenes, which can be used for cross-sensor matching task. </li>
-                    </ul>
                 </div>
             </div>
         </div>
@@ -271,33 +257,14 @@
                 <img src='./static/images/model.png' width="100%" height="100%">
                 <br><br>
                 <div class="content has-text-justified">
-                    <p> AnyTouch is a unified static-dynamic multi-sensor tactile representation learning framework
-                        which integrates the input format of tactile images and videos. It learns both fine-grained
-                        pixel-level details for refined tasks and semantic-level sensor-agnostic features for
-                        understanding properties and building unified space by a multi-level structure:
+                    <p> Crab model mainly consists of two parts: unified audio-visual
+                        interface, which consists of three multimodal branches, and a large language model with interaction-aware LoRA structure. The audio
+                        branch and visual branch process audio and video inputs respectively, while the segmentation branch is responsible for outputting the
+                        segmentation mask. The model is trained on our AV-UIE dataset, which clarifies the cooperation relationship among tasks, as marked
+                        by different colors on the right side of the figure. Content of same color in different tasks can help model establish cooperative relationship
+                        among tasks. Furthermore, to alleviate the interference caused by the learning process of complex audiovisual data, we design an
+                        interaction-aware LoRA structure to facilitate concrete cooperation.
                     </p>
-                    <ul>
-                        <li><b>Masked Image/Video Modeling:</b> To enhance the fine-grained perception capabilities of
-                            the tactile representation model, we employ the masked autoencoder technique compelling the
-                            model to capture pixel-level details across multiple sensors. We randomly mask the tokens of
-                            both tactile images and videos, and build a decoder to obtain the reconstructed static
-                            images and dynamic videos. We also introduce an additional task of predicting the next frame
-                            while reconstructing the dynamic video.</li>
-                        <li><b>Multi-Modal Aligning:</b> We use multi-modal aligning to bind data from
-                            various sensors with paired modalities for a more comprehensive semantic-level perception
-                            and reduce perceptual differences between sensors. We select the text modality, which
-                            consistently describes tactile attributes across datasets, as an anchor to align touch,
-                            vision, and text modalities. The module is also compatible with missing modalities.</li>
-                        <li><b>Cross-Sensor Matching:</b> To fully utilize multi-sensor aligned data and build unified
-                            space by clustering multi-sensor tactile representations of the same object, we introduce a
-                            novel cross-sensor matching task. In this task, the model needs to determine whether two
-                            tactile images or videos are collected from the same position on the same object. We aim to
-                            cluster representations of the same tactile information from different sensors while
-                            performing multi-modal aligning,
-                            thereby enhancing the learning of sensor-agnostic features and forming a unified
-                            multi-sensor representation space.
-                        </li>
-                    </ul>
                 </div>
             </div>
         </div>
@@ -312,7 +279,7 @@
                     style="margin-top: 5px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;"
                     width="90%">
                 <div class="content has-text-justified">
-                    <p>We incorporate data from <span style="color: rgb(61, 127, 207);">GelSight</span>, <span
+<!--                     <p>We incorporate data from <span style="color: rgb(61, 127, 207);">GelSight</span>, <span
                             style="color: rgb(222, 156, 8);">GelSlim</span>, <span
                             style="color: rgb(0, 180, 26);">DIGIT</span> and <span
                             style="color: rgb(151, 81, 203);">GelSight Mini</span> into
@@ -320,6 +287,11 @@
                         downstream tasks. We observe performance improvements across the three unseen datasets, with
                         greater enhancements for unseen sensors than seen sensors. This suggests that the knowledge from
                         the data of GelSlim, DIGIT, and GelSight Mini can transfer to the GelSight and other sensors.
+                    </p> -->
+                    <p>
+                        The comparison results with other general models on all type of tasks. MS3 and AVSS are two subtasks of AVS-Bench. Seen is a
+                        subtask of the Ref-AVS test set. The X-InstructBLIP’s performance on AVQA is zero-shot. ✓ indicates the model has ability to complete
+                        this type of task, but no evaluation is provided in their paper. ✗ indicates the model does not have the corresponding ability.
                     </p>
 
                 </div>
@@ -332,23 +304,8 @@
                     $\dagger$ indicates MMCosine is applied. Combined with MMCosine, most of the fusion methods gain
                     considerable improvement for datasets of various scales, domains, and label amount.
                 </h2> -->
-                <h2 class="title is-4">Comparison with specilized model on MUSIC-AVQA dataset</h2>
-                <img src='./static/images/result2.png' style=" margin-bottom: 5px;">
-                <div class="content has-text-justified">
-                    <p>We extract one aligned contact frame from each sensor for the 30 touches in the unused
-                        fine-grained
-                        subset of TacQuad. We then use t-SNE to visualize the tactile representations. With our
-                        cross-sensor
-                        matching task, the representations from different sensors fully mix in a shared multi-sensor
-                        space,
-                        clearly clustering by the object's tactile information. This indicates that our model possesses
-                        the
-                        ability to extract sensor-agnostic features, enabling generalization to unseen sensors.
 
-                    </p>
-                </div>
-
-                <h2 class="title is-4">Comparison with specilized model on AVE & AVVP dataset</h2>
+                <h2 class="title is-4">Comparison with specialized model on AVE & AVVP dataset</h2>
                 <div class="container is-max-desktop">
                     <div class="columns is-centered" style="display: flex; align-items: center; margin-bottom: 0px;">
                         <div class="column">
@@ -361,14 +318,20 @@
                     </div>
                 </div>
                 <div class="content has-text-justified">
-                    <p>To validate the benefit of unified multi-sensor representations in transferring knowledge from
-                        multiple sensor data to seen sensors and unseen sensors, we compare AnyTouch with existing
-                        multi-sensor models on two datasets from seen sensors and two datasets from unseen sensors. As
-                        shown in the tables, our AnyTouch model outperforms existing methods on all four datasets,
-                        demonstrating its static perception capabilities on both seen and unseen sensors.
-
+                    <p>
+                        The comparison results with specialized models on temporal localization task.
                     </p>
                 </div>
+
+
+                <h2 class="title is-4">Comparison with specialized model on MUSIC-AVQA dataset</h2>
+                <img src='./static/images/result2.png' style=" margin-bottom: 5px;">
+                <div class="content has-text-justified">
+                    <p> 
+                        The comparison results with specialized models on MUSIC-AVQA test set.
+                    </p>
+                </div>
+                
 
                 <img src='./static/images/result5.png'
                     style="margin-top: 12px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;"
@@ -394,7 +357,6 @@
   author={Du, Henghui and Li, Guangyao and Zhou, Chang and Zhang, Chunjie and Zhao, Alan and Hu, Di},
   journal={arXiv preprint arXiv:2503.13068},
   year={2025}
-}
 }</code></pre>
     </div>
 
