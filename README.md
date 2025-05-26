@@ -13,7 +13,7 @@ Crab: A Unified Audio-Visual Scene Understanding Model
 <h5 align="center">
 
 
-[![ArXiv](https://img.shields.io/badge/CVPR-<OpenReview>-<COLOR>.svg)](https://openreview.net/pdf?id=jt7HPDmsHv) [![hf_checkpoint](https://img.shields.io/badge/🤗-Crab_Model-9C276A.svg)](https://huggingface.co/ahsgdxhs/Crab) [![hf_data](https://img.shields.io/badge/🤗-AVUIE_dataset-9C276A.svg)](https://huggingface.co/datasets/ahsgdxhs/AVUIE) [![arXiv](https://img.shields.io/badge/Arxiv-2503.13068-AD1C18.svg?logo=arXiv)](https://arxiv.org/pdf/2503.13068) [![Webpage](https://img.shields.io/badge/Webpage-Crab-<COLOR>.svg)](https://showlab.github.io/Show-o/) [![Demo](https://img.shields.io/badge/Demo-HuggingFace-<COLOR>.svg)](https://huggingface.co/datasets/ahsgdxhs/AVUIE/blob/main/demo.mp4) <br>
+[![ArXiv](https://img.shields.io/badge/CVPR-<OpenReview>-<COLOR>.svg)](https://openreview.net/pdf?id=jt7HPDmsHv) [![hf_checkpoint](https://img.shields.io/badge/🤗-Crab_Model-9C276A.svg)](https://huggingface.co/ahsgdxhs/Crab) [![hf_data](https://img.shields.io/badge/🤗-AVUIE_dataset-9C276A.svg)](https://huggingface.co/datasets/ahsgdxhs/AVUIE) [![arXiv](https://img.shields.io/badge/Arxiv-2503.13068-AD1C18.svg?logo=arXiv)](https://arxiv.org/pdf/2503.13068) [![Webpage](https://img.shields.io/badge/Webpage-Crab-<COLOR>.svg)](https://gewu-lab.github.io/Crab/) [![Demo](https://img.shields.io/badge/Demo-HuggingFace-<COLOR>.svg)](https://huggingface.co/datasets/ahsgdxhs/AVUIE/blob/main/demo.mp4) <br>
 
 <img src="assets/teaser.png" width="800" />
 
