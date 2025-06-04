@@ -10,6 +10,16 @@ from models.multimodal_encoder import (
     SegModule,
     MaskEncoder
 )
+from models.video_llama2.projector import STCConnectorV35
+
+# model = 'video_llama2'
+model = 'unified'
+# model = 'video_chatgpt'
+
+class STC:
+    mm_hidden_size = 1024
+    hidden_size = 4096
+
 
 class UnifiedMetaModel:
 
@@ -20,10 +30,10 @@ class UnifiedMetaModel:
 
     def init_multimodal_modules(
         self,
-        d_model = 3584,
+        d_model = 4096,
         # visual
         vit_ckpt_path = '/group/40061/cserdu/pretrain/openai-clip-vit-large-patch14-224',
-        select_layer_list = [-11,-1],
+        select_layer_list = [14,22,23],
         select_feature = 'patch',
         image_size = 224,
         patch_size = 14,
@@ -49,13 +59,24 @@ class UnifiedMetaModel:
         # vqgan
         use_vqgan = False,
     ):
-        
+
         if visual_branch:
-            image_token_nums = (image_size//patch_size) * (image_size//patch_size)
-            self.visual_encoder = VisualEncoder(model_name_or_path=vit_ckpt_path,select_layer_list=select_layer_list,
-                                                select_feature=select_feature)
-            self.vl_projector = VLProjector(hidden_size=1024, d_model=d_model, depth=2, image_token_nums=image_token_nums,
-                                            num_query_token=visual_query_token_nums, num_hidden_layers=2,)
+            if model == 'video_llama2':
+                config = STC()
+                self.mm_projector = STCConnectorV35(config)
+                image_token_nums = (image_size//patch_size) * (image_size//patch_size)
+                self.visual_encoder = VisualEncoder(model_name_or_path=vit_ckpt_path,select_layer_list=select_layer_list,
+                                                    select_feature=select_feature)
+            elif model == 'video_chatgpt':
+                self.visual_encoder = VisualEncoder(model_name_or_path=vit_ckpt_path,select_layer_list=select_layer_list,
+                                                    select_feature=select_feature)
+                self.mm_projector = nn.Linear(1024,4096)
+            else:
+                image_token_nums = (image_size//patch_size) * (image_size//patch_size)
+                self.visual_encoder = VisualEncoder(model_name_or_path=vit_ckpt_path,select_layer_list=select_layer_list,
+                                                    select_feature=select_feature)
+                self.vl_projector = VLProjector(hidden_size=1024, d_model=d_model, depth=2, image_token_nums=image_token_nums,
+                                                num_query_token=visual_query_token_nums, num_hidden_layers=2,)
             print('init visual_encoder, vl_projector finished...')
 
         if audio_branch:
@@ -89,18 +110,48 @@ class UnifiedMetaModel:
             self.mask_encoder = MaskEncoder(token_shift=32000+20)
 
 
-    def encode_video(self,visual,batch_question=None):
+    def encode_video(self,visual):
+        if model == 'video_llama2':
+            if visual.shape[1] == 1:
+                visual = visual.repeat(1,2,1,1,1)
+            vit_feature_list = self.visual_encoder(visual)  # [(b,t*n,d),(b,t*n,d),...]
+            qformer_feature_list = []
+            for vit_feature in vit_feature_list:
+                b, tn, dim = vit_feature.shape
+                n = 256
+                t = int(tn // n)
+                vit_feature = vit_feature.reshape(b, t, n, dim)
+                vit_feature = vit_feature.to(torch.bfloat16)
+                qformer_feature = self.mm_projector(vit_feature)
+                # qformer_feature = self.vl_projector(vit_feature) # b,t*256 -> b,t*32
+                qformer_feature_list.append(qformer_feature)
+            return vit_feature_list, qformer_feature_list    
+        elif model == 'video_chatgpt':
+            vit_feature_list = self.visual_encoder(visual)  # [(b,t*n,d),(b,t*n,d),...]
+            pooled_feature_list = []
+            for vit_feature in vit_feature_list:
+                b, tn, dim = vit_feature.shape
+                n = 256
+                t = int(tn // n)
+                vit_feature = vit_feature.reshape(b, t, n, dim)
+                t_pooled_feature = torch.mean(vit_feature, dim = 1) # b, n, dim
+                s_pooled_feature = torch.mean(vit_feature, dim = 2) # b, t, dim
+                pooled_feature = torch.cat([t_pooled_feature,s_pooled_feature],dim = 1) # b, (n+t), dim
+                pooled_feature = self.mm_projector(pooled_feature)
+                pooled_feature_list.append(pooled_feature)
+            return vit_feature_list, pooled_feature_list
+        
         vit_feature_list = self.visual_encoder(visual)  # [(b,t*n,d),(b,t*n,d),...]
         qformer_feature_list = []
         for vit_feature in vit_feature_list:
-            qformer_feature = self.vl_projector(vit_feature,batch_question) # b,t*256 -> b,t*32
+            qformer_feature = self.vl_projector(vit_feature) # b,t*256 -> b,t*32
             qformer_feature_list.append(qformer_feature)
-        return vit_feature_list,qformer_feature_list
+        return vit_feature_list, qformer_feature_list
 
 
-    def encode_audio(self,audio,batch_qustion=None):
+    def encode_audio(self,audio):
         audio_feature = self.audio_encoder(audio)
-        audio_feature = self.al_projector(audio_feature,batch_qustion)
+        audio_feature = self.al_projector(audio_feature)
         return audio_feature
 
 
@@ -131,19 +182,19 @@ class UnifiedMetaForCausalLM(ABC):
     def get_model(self) -> UnifiedMetaModel:
         pass
 
-    def encode_audio(self,audio,batch_qustion=None, batch_first=True):
+    def encode_audio(self,audio, batch_first=True):
         if not batch_first:
             audio = audio.unsqueeze(0)
-        audio_feature = self.get_model().encode_audio(audio,batch_qustion=batch_qustion)
+        audio_feature = self.get_model().encode_audio(audio)
         if not batch_first:
             audio_feature = audio_feature.squeeze(0)
         return audio_feature
 
 
-    def encode_video(self,video,batch_question=None,batch_first=True):
+    def encode_video(self,video,batch_first=True):
         if not batch_first:
             video = video.unsqueeze(0)
-        vit_feature_list, qformer_feature_list = self.get_model().encode_video(video,batch_question=batch_question)
+        vit_feature_list, qformer_feature_list = self.get_model().encode_video(video)
         if not batch_first:
             vit_feature_list = [item.squeeze(0) for item in vit_feature_list]
             qformer_feature_list = [item.squeeze(0) for item in qformer_feature_list]
@@ -168,8 +219,6 @@ class UnifiedMetaForCausalLM(ABC):
         batch_input_ids,
         batch_labels,
         batch_X_modals,
-        batch_audio_question = None,
-        batch_visual_question = None,
         batch_task_names = None,
         return_multi_scale_features = False,
         return_gt_mask = False,
@@ -184,38 +233,45 @@ class UnifiedMetaForCausalLM(ABC):
             for i, X_modals in enumerate(batch_X_modals):
                 is_avs_task = batch_task_names[i] in ['ms3','s4','avss','ref-avs']
                 if not is_avs_task:
+                    gt_mask.append(torch.zeros([1,224,224],dtype=torch.float32,device=device))
+                    for _scale in range(scale):
+                        multi_scale_image_features[_scale].append(torch.zeros([256,1024],dtype=torch.float32,device=device))
                     continue
                 for key, X_modal in X_modals.items():
                     if key == '<mask>':
                         gt_mask.append(X_modal) # [(1,224,224), ...]
                     elif key == '<image>':
-                        vit_feature_list, qformer_feature_list = self.encode_video(batch_X_modals[i][key],batch_question=None,batch_first=False)
+                        vit_feature_list, qformer_feature_list = self.encode_video(batch_X_modals[i][key],batch_first=False)
                         if return_multi_scale_features and is_avs_task:
                             for _scale in range(scale):
                                 multi_scale_image_features[_scale].append(vit_feature_list[_scale])
-            if len(gt_mask) > 0:
-                gt_mask = torch.stack(gt_mask,dim=0) # b,1,224,224
+            
+            gt_mask = torch.stack(gt_mask,dim=0) # b,1,224,224
+            ## [(bs,n,dim), (bs,n,dim), ...]
+            multi_scale_image_features = [torch.stack(item,dim=0) for item in multi_scale_image_features if len(item) > 0]
 
         max_length = 0
         new_batch_inputs_embeds = []
         new_batch_attention_mask = []
         new_batch_labels = []
         batch_mask_token_indices = []
-        # keys = ['<image>','<video>','<audio>','<mask>']
         keys = self.KEYS
         mask_tokens = self.MASK
+        # audio 32000 video 32001
+        # This is <audio_begin><audio></audio_end>, This is video <vs><video><ve>, label.......
         for i in range(bs):
             input_ids = batch_input_ids[i]
             labels = batch_labels[i]
             task_name = batch_task_names[i]
             is_avs_task = task_name in ['ms3','s4','avss','ref-avs']
-
-            if return_multi_scale_features and is_avs_task:
-                mask_token_indices = torch.where(torch.any(torch.stack([input_ids == self.SPECIAL_TOKEN_2_IDS[mask_token] for mask_token in mask_tokens]), dim=0))[0]
-                mask_token_indices = mask_token_indices.tolist()
-            
+            if return_multi_scale_features:
+                if is_avs_task:
+                    mask_token_indices = torch.where(torch.any(torch.stack([input_ids == self.SPECIAL_TOKEN_2_IDS[mask_token] for mask_token in mask_tokens]), dim=0))[0]
+                    mask_token_indices = mask_token_indices.tolist()
+                else:
+                    mask_token_indices = [_ for _ in range(2,8)]
             X_token_indices = torch.where(torch.any(torch.stack([input_ids == self.SPECIAL_TOKEN_2_IDS[key] for key in keys]), dim=0))[0]
-            X_token_indices = X_token_indices.tolist()            
+            X_token_indices = X_token_indices.tolist()     #    [5, 10]   
 
             inputs_embeds_seg=[]
             labels_seg=[]
@@ -226,11 +282,11 @@ class UnifiedMetaForCausalLM(ABC):
                 
                 special_token = self.IDS_2_SPECIAL_TOKEN[input_ids[indice].item()]
                 if special_token == '<audio>':
-                    feature = self.encode_audio(batch_X_modals[i][special_token],batch_qustion=None,batch_first=False)
+                    feature = self.encode_audio(batch_X_modals[i][special_token],batch_first=False)
                     inputs_embeds_seg.append(feature)
                     labels_seg.append(torch.full((feature.shape[0],),-100,dtype=torch.long,device=device))
                 elif special_token == '<video>':
-                    vit_feature_list, qformer_feature_list = self.encode_video(batch_X_modals[i][special_token],batch_question=None,batch_first=False)
+                    vit_feature_list, qformer_feature_list = self.encode_video(batch_X_modals[i][special_token],batch_first=False)
                     feature = qformer_feature_list[-1] # last layer qformer feature
                     inputs_embeds_seg.append(feature)  
                     labels_seg.append(torch.full((feature.shape[0],),-100,dtype=torch.long,device=device))
@@ -238,7 +294,7 @@ class UnifiedMetaForCausalLM(ABC):
                     #     for _scale in range(scale):
                     #         multi_scale_image_features[_scale].append(vit_feature_list[_scale]) # (10*256,1024)
                 elif special_token == '<image>':
-                    vit_feature_list, qformer_feature_list = self.encode_video(batch_X_modals[i][special_token],batch_question=None,batch_first=False)
+                    vit_feature_list, qformer_feature_list = self.encode_video(batch_X_modals[i][special_token],batch_first=False)
                     feature = qformer_feature_list[-1] # last layer qformer feature
                     inputs_embeds_seg.append(feature)
                     labels_seg.append(torch.full((feature.shape[0],),-100,dtype=torch.long,device=device))
@@ -251,7 +307,7 @@ class UnifiedMetaForCausalLM(ABC):
                     inputs_embeds_seg.append(feature)
                     labels_seg.append(indices)
                 
-                if return_multi_scale_features and is_avs_task:
+                if return_multi_scale_features:
                     mask_token_indices = [item + feature.shape[0] - 1 for item in mask_token_indices]
 
                 pre_indice = indice + 1 # +1,skip special token
@@ -268,23 +324,17 @@ class UnifiedMetaForCausalLM(ABC):
             new_batch_attention_mask.append(attention_mask_seg)
             new_batch_labels.append(labels_seg)
             
-            if return_multi_scale_features and is_avs_task:
+            if return_multi_scale_features:
                 batch_mask_token_indices.append(mask_token_indices)
             # batch_mask_token_indices.append(mask_token_indices)
-
             max_length = max(max_length,inputs_embeds_seg.shape[0])
-
-
-        if return_multi_scale_features:
-            ## [(bs,n,dim), (bs,n,dim), ...]
-            multi_scale_image_features = [torch.stack(item,dim=0) for item in multi_scale_image_features if len(item) > 0]
-
+        
         ### left padding
         padding_inputs_embeds = []
         padding_attention_mask = []
         padding_labels = []
         padding_mask_token_mask = []
-        avs_sample_idx = 0
+        # avs_sample_idx = 0
         for i in range(bs):
         # for embeds, mask, labels, mask_indice in zip(new_batch_inputs_embeds, new_batch_attention_mask, new_batch_labels, batch_mask_token_indices):
             embeds = new_batch_inputs_embeds[i]
@@ -299,15 +349,21 @@ class UnifiedMetaForCausalLM(ABC):
             
             task_name = batch_task_names[i]
             is_avs_task = task_name in ['ms3','s4','avss','ref-avs']
-            if return_multi_scale_features and is_avs_task:
-                mask_indice = batch_mask_token_indices[avs_sample_idx]
+            # if return_multi_scale_features and is_avs_task:
+                # mask_indice = batch_mask_token_indices[avs_sample_idx]
+                # mask_indice = [item + max_length - L - 1 for item in mask_indice]  # note: -1
+                # mask_token_mask = torch.zeros((max_length),dtype=torch.bool,device=device)
+                # mask_token_mask[mask_indice] = 1
+                # padding_mask_token_mask.append(mask_token_mask)
+                # avs_sample_idx += 1
+            if return_multi_scale_features:
+                mask_indice = batch_mask_token_indices[i]
                 mask_indice = [item + max_length - L - 1 for item in mask_indice]  # note: -1
                 mask_token_mask = torch.zeros((max_length),dtype=torch.bool,device=device)
                 mask_token_mask[mask_indice] = 1
                 padding_mask_token_mask.append(mask_token_mask)
-                avs_sample_idx += 1
     
-        padding_inputs_embeds = torch.stack(padding_inputs_embeds,dim=0)
+        padding_inputs_embeds = torch.stack(padding_inputs_embeds,dim=0) # bs, seq_len,dim
         padding_attention_mask = torch.stack(padding_attention_mask,dim=0)
         padding_labels = torch.stack(padding_labels,dim=0)
         if len(padding_mask_token_mask) > 0:
@@ -370,7 +426,7 @@ class UnifiedMetaForCausalLM(ABC):
             self.KEYS.append('<mask>')
 
         seg_tokens = [f'<mask_{i}>' for i in range(mask_token_nums)]
-        num_new_tokens += tokenizer.add_tokens(seg_tokens,special_tokens=True)
+        num_new_tokens += tokenizer.add_tokens(seg_tokens,special_tokens=False)
         added_tokens += seg_tokens
         
         ### tag token
@@ -416,10 +472,12 @@ class UnifiedMetaForCausalLM(ABC):
         #     output_embeddings[-num_new_tokens:] = output_embeddings_avg
 
         #     self.get_input_embeddings().requires_grad_(True)
-        #     if output_embeddings_require_grad:
-        #         self.get_output_embeddings().requires_grad_(True)
-        #     else:
-        #         self.get_output_embeddings().requires_grad_(False)
+        #     self.get_output_embeddings().requires_grad_(True)
+        
+            # if output_embeddings_require_grad:
+            #     self.get_output_embeddings().requires_grad_(True)
+            # else:
+            #     self.get_output_embeddings().requires_grad_(False)
 
         # self.get_input_embeddings().requires_grad_(False)
         # if output_embeddings_require_grad:

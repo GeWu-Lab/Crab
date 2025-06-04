@@ -35,7 +35,7 @@ class VisualEncoder(nn.Module):
     def __init__(
         self,
         model_name_or_path = '/group/40061/cserdu/pretrain/openai-clip-vit-large-patch14-224',
-        select_layer_list = [-11,-1],
+        select_layer_list = [-11,-2,-1],
         select_feature = 'patch',
     ) -> None:
         super().__init__()
@@ -100,7 +100,7 @@ class VLProjector(nn.Module):
         self.image_token_nums = image_token_nums
         self.visual_ln = nn.LayerNorm(hidden_size)
 
-        self.tokenizer = BertTokenizer.from_pretrained(bert_ckpt_path, local_files_only=True, truncation_side='right')
+        # self.tokenizer = BertTokenizer.from_pretrained(bert_ckpt_path, local_files_only=True, truncation_side='right')
         
         encoder_config = BertConfig.from_pretrained(bert_ckpt_path,local_files_only=True)
         encoder_config.num_hidden_layers = num_hidden_layers
@@ -116,7 +116,7 @@ class VLProjector(nn.Module):
         self.visual_proj = build_mlp(depth=depth,hidden_size=encoder_config.hidden_size,output_hidden_size=d_model)
         
 
-    def forward(self,visual_feature,question):
+    def forward(self,visual_feature):
         '''
             visual_feature: b,t*n,d
             text_ids: b,L
@@ -131,37 +131,13 @@ class VLProjector(nn.Module):
         
         query_tokens = self.visual_query_tokens.expand(visual_feature.shape[0], -1, -1) # bt,32,d
         query_atts = torch.ones(query_tokens.size()[:-1], dtype=torch.int32).to(device) # bt,32
-        
-        if question is not None:
-            text_Qformer = self.tokenizer(
-                question,
-                padding='longest',
-                truncation=True,
-                return_tensors="pt",
-            ).to(device)
-            text_atts = text_Qformer.attention_mask.unsqueeze(1).expand(-1,t,-1).reshape(b*t,-1)
-            text_input_ids = text_Qformer.input_ids.unsqueeze(1).expand(-1,t,-1).reshape(b*t,-1)
-
-            Qformer_atts = torch.cat([query_atts,text_atts],dim=1) # bt,L
-            # print('input_ids: ',text_input_ids.device,' text_atts: ',text_atts.device)
-            query_output = self.visual_Qformer.bert(
-                text_input_ids,
-                attention_mask=Qformer_atts,
-                query_embeds=query_tokens,
-                encoder_hidden_states=visual_feature,
-                encoder_attention_mask=visual_atts,
-                return_dict=True,
-            )
-            # print('query output...')
-        else:
-            query_output = self.visual_Qformer.bert(
-                attention_mask=query_atts,
-                query_embeds=query_tokens,
-                encoder_hidden_states=visual_feature,
-                encoder_attention_mask=visual_atts,
-                return_dict=True,
-            )
-        
+        query_output = self.visual_Qformer.bert(
+            attention_mask=query_atts,
+            query_embeds=query_tokens,
+            encoder_hidden_states=visual_feature,
+            encoder_attention_mask=visual_atts,
+            return_dict=True,
+        )
         visual_embeds = query_output.last_hidden_state # bt,32,d
         visual_embeds = self.visual_proj(visual_embeds[:,:self.num_query_token])
         visual_embeds = visual_embeds.reshape(b,t*self.num_query_token,-1) # b,t*32,dim
@@ -196,12 +172,17 @@ class AudioEncoder(nn.Module):
     
 
     def forward(self,audio):
-        # audio: b,t,L,128
-        b,t,L,d = audio.shape
-        audio = audio.reshape(b*t,L,d)
-        audio_embeds = self.encode_audio(audio) # bt,n,d
-        n = audio_embeds.shape[1]
-        audio_embeds = audio_embeds.reshape(b,t,n,-1)
+        # audio: b,L,128
+        if len(audio.shape) == 4:
+            b, t, L, d = audio.shape
+            audio = audio.reshape(b * t, L, d)
+            audio_embeds = self.encode_audio(audio) # b*t, n, d
+            n = audio_embeds.shape[1]
+            audio_embeds = audio_embeds.reshape(b, t, n, -1)
+        elif len(audio.shape) == 3:
+            b, L, d = audio.shape
+            audio_embeds = self.encode_audio(audio) # b,n,d
+        
         return audio_embeds
 
 
@@ -219,7 +200,7 @@ class ALProjector(nn.Module):
 
         self.audio_ln = nn.LayerNorm(hidden_size)
         self.num_query_token = num_query_token
-        self.tokenizer = BertTokenizer.from_pretrained(bert_ckpt_path, local_files_only=True, truncation_side='right')
+        # self.tokenizer = BertTokenizer.from_pretrained(bert_ckpt_path, local_files_only=True, truncation_side='right')
         # tokenizer.add_special_tokens({"bos_token": "[DEC]"})
     
         encoder_config = BertConfig.from_pretrained(bert_ckpt_path,local_files_only=True)
@@ -234,42 +215,22 @@ class ALProjector(nn.Module):
         self.audio_query_tokens.data.normal_(mean=0.0, std=encoder_config.initializer_range)
 
         self.audio_proj = build_mlp(depth=depth,hidden_size=encoder_config.hidden_size,output_hidden_size=d_model)
-        # print('init al_projector finished...')   
 
-    def forward(self,audio_feature,question):
+
+    def forward(self,audio_feature):
         '''
-            audio_feature: b,t,n,d
+            audio_feature: b,n,d  / b, t, n, d
             text_ids: b,L
         '''
         device = audio_feature.device
-        b,t,n,dim = audio_feature.shape
-        audio_feature = audio_feature.reshape(b*t, n, -1)
+        if len(audio_feature.shape) == 4:
+            b, t, n, d = audio_feature.shape
+            audio_feature = audio_feature.reshape(b * t, n, d)
 
-        audio_feature = self.audio_ln(audio_feature)
-        audio_atts = torch.ones(audio_feature.size()[:-1], dtype=torch.int32, device=device) # bt,n
-        
-        query_tokens = self.audio_query_tokens.expand(audio_feature.shape[0], -1, -1) # bt,32,d
-        query_atts = torch.ones(query_tokens.size()[:-1], dtype=torch.int32).to(device) # bt,32
-        if question is not None:
-            text_Qformer = self.tokenizer(
-                question,
-                padding='longest',
-                truncation=True,
-                return_tensors="pt",
-            ).to(device)
-            text_atts = text_Qformer.attention_mask.unsqueeze(1).expand(-1,t,-1).reshape(b*t,-1) # bt,n
-            text_input_ids = text_Qformer.input_ids.unsqueeze(1).expand(-1,t,-1).reshape(b*t,-1) # bt,n
-
-            Qformer_atts = torch.cat([query_atts,text_atts],dim=1) # bt,L
-            query_output = self.audio_Qformer.bert(
-                text_input_ids,
-                attention_mask=Qformer_atts,
-                query_embeds=query_tokens,
-                encoder_hidden_states=audio_feature,
-                encoder_attention_mask=audio_atts,
-                return_dict=True,
-            )
-        else:
+            audio_feature = self.audio_ln(audio_feature)
+            audio_atts = torch.ones(audio_feature.size()[:-1], dtype=torch.int32, device=device) # bt,n
+            query_tokens = self.audio_query_tokens.expand(audio_feature.shape[0], -1, -1) # bt,32,d
+            query_atts = torch.ones(query_tokens.size()[:-1], dtype=torch.int32).to(device) # bt,32
             query_output = self.audio_Qformer.bert(
                 attention_mask=query_atts,
                 query_embeds=query_tokens,
@@ -277,9 +238,27 @@ class ALProjector(nn.Module):
                 encoder_attention_mask=audio_atts,
                 return_dict=True,
             )
-        audio_embeds = query_output.last_hidden_state # bt,L,d
-        audio_embeds = self.audio_proj(audio_embeds[:,:self.num_query_token])
-        audio_embeds = audio_embeds.reshape(b,t*self.num_query_token,-1) # b,t*32,dim
+            audio_embeds = query_output.last_hidden_state # bt,L,d
+            audio_embeds = audio_embeds[:,:self.num_query_token]
+            audio_embeds = audio_embeds.reshape(b, t * self.num_query_token, -1)
+            audio_embeds = self.audio_proj(audio_embeds)
+
+        elif len(audio_feature.shape) == 3:
+            b, n, d = audio_feature.shape
+            audio_feature = self.audio_ln(audio_feature)
+            audio_atts = torch.ones(audio_feature.size()[:-1], dtype=torch.int32, device=device) # b,n
+            query_tokens = self.audio_query_tokens.expand(audio_feature.shape[0], -1, -1) # b,32,d
+            query_atts = torch.ones(query_tokens.size()[:-1], dtype=torch.int32).to(device) # b,32
+            query_output = self.audio_Qformer.bert(
+                attention_mask=query_atts,
+                query_embeds=query_tokens,
+                encoder_hidden_states=audio_feature,
+                encoder_attention_mask=audio_atts,
+                return_dict=True,
+            )
+            audio_embeds = query_output.last_hidden_state # b,L,d
+            audio_embeds = self.audio_proj(audio_embeds[:,:self.num_query_token])
+
         return audio_embeds
 
 
@@ -462,7 +441,6 @@ class SegModule(nn.Module):
                 original_size=None,
             ) # object_nums, num_classes, h, w   (1, num_classes, 224, 224)
             pred_masks.append(pred_mask[0])  # [num_classes, 224, 224]
-
         if gt_mask is None:
             return {
                 'pred_masks':pred_masks,
@@ -499,8 +477,9 @@ class SegModule(nn.Module):
                     F10_IoU_BCELoss(pred_mask=pred_mask.unsqueeze(0),ten_gt_masks=gt_mask,gt_temporal_mask_flag=None)
                 )
                 avss_sample_nums += 1
-            num_masks += gt_mask.shape[0]
+           
         
+        bs = len(batch_task_names)
         bce_loss_weight = 1.0
         dice_loss_weight = 0.5
         if ms3_s4_sample_nums > 0:
@@ -510,6 +489,8 @@ class SegModule(nn.Module):
             avss_ce_loss = bce_loss_weight * avss_ce_loss * (avss_sample_nums / (ms3_s4_sample_nums + avss_sample_nums))
         
         mask_loss = ms3_s4_mask_bce_loss + ms3_s4_mask_dice_loss + avss_ce_loss
+        # if ms3_s4_sample_nums + avss_sample_nums > 0:
+        #     mask_loss = mask_loss / (ms3_s4_sample_nums + avss_sample_nums)
         
         return {
             'mask_loss':mask_loss
@@ -1409,7 +1390,6 @@ class Attention(nn.Module):
         return out
 
 
-
 '''
 query generator
 '''
@@ -1463,4 +1443,6 @@ class QueryGenerator(nn.Module):
             query = layer(avs_query, sparse_embedding)
         return query
 
-
+'''
+pvt_v2_b5 encoder
+'''
