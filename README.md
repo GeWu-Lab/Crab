@@ -20,7 +20,7 @@ Crab: A Unified Audio-Visual Scene Understanding Model
 
 
 ## 📰 News
-* **[2025.03.20]**   Upload [YouTube Presentation Video](https://www.youtube.com/watch?v=-zi-PzVNQI0)
+* **[2025.06.04]**   Upload [YouTube Presentation Video](https://www.youtube.com/watch?v=-zi-PzVNQI0)
 * **[2025.03.20]**   Release [pretrain, finetune weights](https://huggingface.co/ahsgdxhs/Crab) and [AV-UIE Dataset](https://huggingface.co/datasets/ahsgdxhs/AVUIE).
 * **[2025.03.17]**   [Project demo video](https://huggingface.co/datasets/ahsgdxhs/AVUIE/blob/main/demo.mp4)
 * **[2025.03.15]**   Release training, evaluation and inference codes of Crab.
