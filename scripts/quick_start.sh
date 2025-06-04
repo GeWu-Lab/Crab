@@ -43,8 +43,8 @@ python scripts/quick_start.py \
     --tf32 False \
     --fp16 False \
     --ckpt_dir results/finetune/057-joint_all/checkpoint-819 \
-    --avs_ckpt_dir results/finetune/059-finetune-avss/checkpoint-5022 \
-    --avqa_task True \
+    --avs_ckpt_dir $avs_ckpt_dir \
+    --avqa_task False \
     --ave_task False \
     --avvp_task False \
     --arig_task False \
@@ -52,8 +52,8 @@ python scripts/quick_start.py \
     --ms3_task False \
     --s4_task False \
     --avss_task False \
-    --ref_avs_task False \
-    --test_name test_u \
+    --ref_avs_task True \
+    --test_name test_s \
     --device cuda:0 \
     --multi_frames False \
     --visual_branch True \

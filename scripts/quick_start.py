@@ -99,6 +99,7 @@ def inference_ms3(dataloader,ckpt_dir,model,tokenizer):
                     pred_mask_img = Image.fromarray(pred_mask_img[0]).convert('P')
                     pred_save_path = join(img_dir,video_name,f'{filename}_pred.png')
                     pred_mask_img.save(pred_save_path, format='PNG')
+                    print(f'pred mask save path: {pred_save_path}')
 
                     gt_mask_img = (torch.sigmoid(gt_mask)>0.5).int()
                     gt_mask_img = gt_mask_img.cpu().data.numpy().astype(np.uint8)
@@ -106,11 +107,13 @@ def inference_ms3(dataloader,ckpt_dir,model,tokenizer):
                     gt_mask_img = Image.fromarray(gt_mask_img[0]).convert('P')
                     gt_save_path = join(img_dir,video_name,f'{filename}_gt.png')
                     gt_mask_img.save(gt_save_path,format='PNG')
+                    print(f'gt mask save path: {gt_save_path}')
 
                     image = Image.open(image_path).convert('RGB')
                     image = image.resize((224,224))
                     img_save_path = join(img_dir,video_name,filename+'_image.jpg')
                     image.save(img_save_path)
+                    print(f'image save path: {img_save_path}')
 
                     iou = mask_iou(pred=pred_mask.cpu(),target=gt_mask.cpu())
                     fscore = Eval_Fmeasure(pred=pred_mask.cpu(),gt=gt_mask.cpu())
@@ -176,6 +179,7 @@ def inference_s4(dataloader,ckpt_dir,model,tokenizer):
                     pred_mask_img = Image.fromarray(pred_mask_img[0]).convert('P')
                     pred_save_path = './s4_pred_mask.png'
                     pred_mask_img.save(pred_save_path, format='PNG')
+                    print(f'pred mask save path: {pred_save_path}')
 
                     gt_mask_img = (torch.sigmoid(gt_mask)>0.5).int()
                     gt_mask_img = gt_mask_img.cpu().data.numpy().astype(np.uint8)
@@ -183,11 +187,13 @@ def inference_s4(dataloader,ckpt_dir,model,tokenizer):
                     gt_mask_img = Image.fromarray(gt_mask_img[0]).convert('P')
                     gt_save_path = './s4_gt_mask.png'
                     gt_mask_img.save(gt_save_path,format='PNG')
+                    print(f'gt mask save path: {gt_save_path}')
 
                     image = Image.open(image_path).convert('RGB')
                     image = image.resize((224,224))
                     img_save_path = './s4_raw_image.jpg'
                     image.save(img_save_path)
+                    print(f'image save path: {img_save_path}')
 
                     iou = mask_iou(pred=pred_mask.cpu(),target=gt_mask.cpu())
                     fscore = Eval_Fmeasure(pred=pred_mask.cpu(),gt=gt_mask.cpu())
@@ -242,6 +248,7 @@ def inference_ref_avs(dataloader,ckpt_dir,model,tokenizer,test_name='test_s'):
                 pred_mask_img = Image.fromarray(pred_mask_img[0]).convert('P')
                 pred_save_path = './ref-avs_pred.png'
                 pred_mask_img.save(pred_save_path, format='PNG')
+                print(f'pred mask save path: {pred_save_path}')
 
                 gt_mask_img = (torch.sigmoid(gt_mask)>0.5).int()
                 gt_mask_img = gt_mask_img.cpu().data.numpy().astype(np.uint8)
@@ -249,11 +256,13 @@ def inference_ref_avs(dataloader,ckpt_dir,model,tokenizer,test_name='test_s'):
                 gt_mask_img = Image.fromarray(gt_mask_img[0]).convert('P')
                 gt_save_path = './ref-avs_gt.png'
                 gt_mask_img.save(gt_save_path,format='PNG')
+                print(f'gt mask save path: {gt_save_path}')
 
                 image = Image.open(image_path).convert('RGB')
                 image = image.resize((224,224))
                 img_save_path = './ref-avs_raw_image.jpg'
                 image.save(img_save_path)
+                print(f'image save path: {img_save_path}')
 
                 iou = mask_iou(pred=pred_mask.cpu(),target=gt_mask.cpu())
                 fscore = Eval_Fmeasure(pred=pred_mask.cpu(),gt=gt_mask.cpu())
@@ -314,6 +323,7 @@ def inference_ref_avs_null(dataloader,ckpt_dir,model,tokenizer,test_name='test_n
                 pred_mask_img = Image.fromarray(pred_mask_img[0]).convert('P')
                 pred_save_path = join(img_dir,video_name,f'{filename}_pred.png')
                 pred_mask_img.save(pred_save_path, format='PNG')
+                print(f'pred mask save path: {pred_save_path}')
 
                 gt_mask_img = (torch.sigmoid(gt_mask)>0.5).int()
                 gt_mask_img = gt_mask_img.cpu().data.numpy().astype(np.uint8)
@@ -321,11 +331,13 @@ def inference_ref_avs_null(dataloader,ckpt_dir,model,tokenizer,test_name='test_n
                 gt_mask_img = Image.fromarray(gt_mask_img[0]).convert('P')
                 gt_save_path = join(img_dir,video_name,f'{filename}_gt.png')
                 gt_mask_img.save(gt_save_path,format='PNG')
+                print(f'gt mask save path: {gt_save_path}')
 
                 image = Image.open(image_path).convert('RGB')
                 image = image.resize((224,224))
                 img_save_path = join(img_dir,video_name,filename+'_image.jpg')
                 image.save(img_save_path)
+                print(f'image save path: {img_save_path}')
 
                 s = metric_s_for_null(pred_mask.cpu())
                 s = s.item()
@@ -563,6 +575,7 @@ def inference(attn_implementation=None):
         
     if data_args.avss_task:
         inference_avss(dataloader=dataloader,ckpt_dir=ckpt_dir,model=model,tokenizer=tokenizer)
+    
     if data_args.ref_avs_task:
         test_name = infer_args.test_name
         if test_name == 'test_n':
