@@ -6,18 +6,18 @@ import transformers
 @dataclass
 class ModelArguments:  
     # llm
-    model_name_or_path: Optional[str] = field(default="")
+    model_name_or_path: Optional[str] = field(default="/data/users/henghui_du/pretrain/video-llama2/Mistral-7B-Instruct-v0.2")
     freeze_backbone: bool = field(default=True, metadata={"help": "Whether to freeze the LLM backbone."})
     llm_name: str = field(default='qwen')
     ## visual module
-    vit_ckpt_path: str = field(default='')
+    vit_ckpt_path: str = field(default='/group/40061/cserdu/pretrain/openai-clip-vit-large-patch14-224')
     select_layer_list = [14,22,23]  # [-11,-2,-1]
     select_feature: str = field(default='patch')
     image_size: int = field(default=224)
     patch_size: int = field(default=14)
     visual_query_token_nums: int = field(default=32)
     ## audio module
-    BEATs_ckpt_path: str = field(default='')
+    BEATs_ckpt_path: str = field(default='/group/40061/cserdu/pretrain/beats/BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt')
     audio_query_token_nums: int = field(default=32)
     ## seg module
     prompt_embed_dim: int = field(default=256)
@@ -38,7 +38,6 @@ class InferenceArguments:
     # for infer avs
     avs_ckpt_dir: str = field(default='')
     avss_ckpt_dir: str = field(default='')
-    adapter_ckpt_path: str = field(default=None)
     test_name: str = field(default='test') # for ref-avs: test_u,test_s,test_n
 
     device: str = field(default='cuda:0')
@@ -64,6 +63,9 @@ class DataArguments:
     avcap_task: bool = field(default=False)
     ref_avs_task: bool = field(default=False)
     multi_frames: bool = field(default=False) # avs task input single frame
+
+    next_qa_task: bool = field(default=False)
+    aok_vqa_task: bool = field(default=False)
 
 
 
@@ -111,9 +113,6 @@ class TrainingArguments(transformers.TrainingArguments):
     visual_branch: bool = field(default=False)
     seg_branch: bool = field(default=False)
 
-    pretrain_ckpt_dir: str = field(default='')
-    finetune_ckpt_dir: str = field(default='')
-
     save_modules: str = field(default='vl_projector,al_projector,lora')
 
     exp_desc: str = field(default='exp')
@@ -121,3 +120,5 @@ class TrainingArguments(transformers.TrainingArguments):
     use_process: bool = field(default=True)
 
     use_hyper_lora: bool = field(default=True)
+
+    unifed_finetune_ckpt_path: str = field(default='')
